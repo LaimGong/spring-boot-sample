@@ -1,0 +1,35 @@
+debug: true
+spring:
+  shardingsphere:
+    datasource:
+      ds0:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/db0
+        username: root
+        password: root
+      ds1:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/db1
+        username: root
+        password: root
+      names: ds0,ds1
+    sharding:
+      tables:
+        t_shard:
+          actual-data-nodes: ds$->{0..1}.t_shard_$->{0..2}
+          table-strategy:
+            inline:
+              sharding-column: order_id
+              algorithm-expression: t_shard_$->{order_id % 3}
+          key-generator:
+            type: SNOWFLAKE
+            column: order_id
+          database-strategy:
+            inline:
+              sharding-column: user_id
+              algorithm-expression: ds$->{user_id % 3}
+    props:
+      sql:
+        show: true
